@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Declaração de Amor</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            max-width: 100vw;
+            overflow-x: hidden;
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        #login-screen, #choose-screen, #welcome-fullscreen {
+            min-width: 100vw;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        #login-form {
+            width: 90vw;
+            max-width: 350px;
+            min-width: unset;
+        }
+        #music-toggle {
+            min-width: 0;
+            max-width: 90vw;
+            word-break: break-word;
+        }
+        #music-select-container {
+            max-width: 90vw;
+            min-width: 180px;
+            box-sizing: border-box;
+        }
+        #music-select {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #btn-voltar-selecao {
+            left: 10px !important;
+            top: 10px !important;
+            padding: 6px 12px 6px 10px !important;
+            font-size: 0.95rem !important;
+        }
+        .container {
+            width: 100vw;
+            max-width: 100vw;
+            box-sizing: border-box;
+            padding-bottom: 60px;
+        }
+        .content-section, .text-area {
+            max-width: 98vw;
+            box-sizing: border-box;
+            word-break: break-word;
+        }
+        .galeria-scroll {
+            max-width: 98vw;
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+        /* VOLTA O ESTILO ANTIGO DAS IMAGENS */
+        .galeria-scroll img {
+            flex: 0 0 auto;
+            scroll-snap-align: center;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            width: 300px;
+            height: 300px;
+            object-fit: cover;
+        }
+        .gallery-img {
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .gallery-img:hover {
+            transform: scale(1.07);
+            box-shadow: 0 4px 16px rgba(139,0,0,0.4);
+        }
+        /* Ajuste para botões grandes em telas pequenas */
+        button, input, select {
+            font-size: 1rem;
+            max-width: 100vw;
+        }
+        @media (max-width: 600px) {
+            #login-form {
+                padding: 24px 8px;
+                max-width: 98vw;
+            }
+            #choose-screen > div {
+                padding: 18px 6px;
+                min-width: unset;
+                max-width: 98vw;
+            }
+            #music-toggle, #music-select-container {
+                right: 8px !important;
+                left: unset !important;
+            }
+            #btn-voltar-selecao {
+                left: 6px !important;
+                top: 6px !important;
+                font-size: 0.93rem !important;
+                padding: 5px 10px 5px 8px !important;
+            }
+            /* Mantém as imagens quadradas e não esticadas no mobile */
+            .galeria-scroll img {
+                width: 220px;
+                height: 220px;
+                max-width: 80vw;
+                max-height: 80vw;
+                object-fit: cover;
+            }
+            .container {
+                padding-bottom: 80px;
+            }
+        }
+        #welcome-fullscreen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(135deg, #8b0000 60%, #ffb6c1 100%);
+            color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 3000; font-family: Arial, Helvetica, sans-serif; font-size: 2.2rem; letter-spacing: 1px;
+            animation: fadeIn 1s; transition: opacity 1s; text-align: center;
+        }
+        #welcome-fullscreen.hide { opacity: 0; pointer-events: none; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .welcome-heart { font-size: 4rem; margin-bottom: 20px; animation: pulse 1.2s infinite; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+<div id="login-screen" style="position:fixed;top:0;left:0;width:100vw;height:100vh;background:linear-gradient(135deg,#8b0000 60%,#ffb6c1 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:4000;">
+    <form id="login-form" style="background:rgba(255,255,255,0.95);padding:40px 30px;border-radius:18px;box-shadow:0 4px 24px rgba(0,0,0,0.18);display:flex;flex-direction:column;align-items:center;gap:18px;min-width:260px;">
+        <h2 style="color:#af0000;margin-bottom:10px;">Charada</h2>
+        <h3 style="color: hwb(0 2% 32%);">O que o Gustavo mais ama nesse mundo?</h3>
+        <input id="login-input" type="text" placeholder="Digite o código secreto" style="padding:10px 14px;border-radius:8px;border:1px solid #ccc;font-size:1.1rem;width:100%;">
+        <button type="submit" style="background:#8b0000;color:#fff;border:none;padding:10px 22px;border-radius:8px;font-size:1.1rem;cursor:pointer;">Entrar</button>
+        <div id="login-error" style="color:#a80000;font-size:1rem;display:none;">Código incorreto. Tente novamente.</div>
+    </form>
+</div>
+
+<audio id="bg-music" src="index/musica.mp3" loop style="display:none;"></audio>
+<button id="music-toggle" style="display:none;position:fixed;top:20px;right:20px;z-index:4000;background:rgba(255,255,255,0.7);color:#8b0000;border:1.5px solid #8b0000;padding:7px 18px 7px 14px;border-radius:18px;font-size:1rem;box-shadow:0 1px 6px rgba(0,0,0,0.08);cursor:pointer;display:flex;align-items:center;gap:8px;opacity:0.85;transition:opacity 0.2s;">
+    <span id="music-toggle-icon">🔊 Música</span>
+    <span id="music-arrow" style="font-size:1.1rem;display:inline-block;transition:transform 0.2s;cursor:pointer;">▼</span>
+</button>
+<div id="music-select-container" style="display:none;position:fixed;top:65px;right:20px;z-index:4100;background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.18);padding:16px 18px;">
+    <label for="music-select" style="color:#8b0000;font-weight:bold;">Escolha a música:</label>
+    <select id="music-select" style="margin-top:8px;padding:6px 12px;border-radius:6px;border:1px solid #ccc;font-size:1rem;">
+        <option value="index/musica.mp3">No escuro (principal)</option>
+        <option value="index/musica2.mp3">Lisboa</option>
+        <option value="index/musica3.mp3">Me Ama</option>
+    </select>
+</div>
+
+<div id="welcome-fullscreen">
+    <div class="welcome-heart">💖</div>
+    <div>
+        Bem-vinda, princesa!<br>
+        Espero que goste do site que fiz com todo meu amor pra você!
+    </div>
+</div>
+<script>
+    setTimeout(() => {
+        document.getElementById('welcome-fullscreen').classList.add('hide');
+    }, 500);
+    setTimeout(() => {
+        document.getElementById('welcome-fullscreen').style.display = 'none';
+    }, 600);
+</script>
+
+<div id="choose-screen" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:linear-gradient(135deg,#8b0000 60%,#ffb6c1 100%);z-index:3500;flex-direction:column;align-items:center;justify-content:center;">
+    <div style="background:rgba(255,255,255,0.97);padding:36px 28px;border-radius:18px;box-shadow:0 4px 24px rgba(0,0,0,0.18);display:flex;flex-direction:column;align-items:center;gap:22px;min-width:260px;">
+        <h2 style="color:#8b0000;">Escolha o que quer ver primeiro:</h2>
+        <button class="choose-btn" data-section="galeria" style="background:#8b0000;color:#fff;border:none;padding:12px 28px;border-radius:10px;font-size:1.1rem;cursor:pointer;margin-bottom:8px;">Galeria de Fotos</button>
+        <button class="choose-btn" data-section="escritas" style="background:#8b0000;color:#fff;border:none;padding:12px 28px;border-radius:10px;font-size:1.1rem;cursor:pointer;margin-bottom:8px;">Declaração</button>
+        <button class="choose-btn" data-section="metas" style="background:#8b0000;color:#fff;border:none;padding:12px 28px;border-radius:10px;font-size:1.1rem;cursor:pointer;margin-bottom:8px;">Minhas Metas</button>
+        <button class="choose-btn" data-section="surpresa" style="background:#8b0000;color:#fff;border:none;padding:12px 28px;border-radius:10px;font-size:1.1rem;cursor:pointer;">Surpresa</button>
+    </div>
+</div>
+
+<div class="container" id="container-main" style="display:none;">
+    <header id="header-main">
+        <h1>Meu coração tem dona, e é você, Alice!</h1>
+        <p class="subtitle">Developed by your future husband</p>
+    </header>
+    <!-- Botão de voltar para seleção (agora discreto e no canto superior esquerdo) -->
+    <button id="btn-voltar-selecao" style="display:none;position:fixed;top:18px;left:18px;z-index:4200;background:rgba(255,255,255,0.7);color:#8b0000;border:1.5px solid #8b0000;padding:7px 18px 7px 14px;border-radius:18px;font-size:1rem;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,0.08);opacity:0.85;transition:opacity 0.2s;">
+        ⬅️ Voltar
+    </button>
+    <section class="content-section" id="section-escritas" style="display:none;">
+        <h2 class="section-title">Cada segundo com você é maravilhoso!</h2>
+        <div class="text-area" id="text-area-1">
+            <p>Todos os dias eu agradeço a Deus por ter colocado você no meu caminho. Você não chegou na minha vida por acaso, você foi a resposta de algo muito maior do que um simples desejo, você foi a resposta de uma oração sincera do meu coração. Quando olho para você, quando vejo o brilho do seu sorriso ou escuto a leveza da sua risada, eu sinto que meu mundo inteiro se transforma. É como se, só pela sua existência, tudo ao meu redor ganhasse cor, sentido e paz.</p>
+            <p>Ter você comigo é muito mais do que qualquer sonho que eu já tenha tido. Você não só melhora os meus dias, como também muda o meu jeito de enxergar a vida. Sem nem perceber, você me inspira a crescer, a evoluir e a me tornar uma pessoa melhor. Eu descubro em mim uma força que não conhecia, só porque quero ser o melhor de mim para estar ao seu lado.</p>
+            <p>Eu não sou perfeito com palavras, mas quis transformar esse site em algo diferente, em algo maior. Não se trata apenas de uma página bonita, mas de uma prova do quanto eu quero mudar, melhorar e evoluir, não apenas aqui, mas em tudo, por você. Cada detalhe que coloquei aqui carrega o peso do que sinto: o desejo de ser melhor, de construir coisas maiores, de mostrar que o meu amor por você é mais forte do que qualquer obstáculo.</p>
+            <p>Se eu pudesse escrever mil textos, nenhum seria suficiente para expressar o que você significa. Então eu prefiro demonstrar na prática, no dia a dia, em cada gesto, em cada atitude, que eu escolho você sempre. Escolho cuidar, proteger, amar e dedicar cada parte de mim a você.</p>
+            <p>Eu já tenho mil motivos para te amar, mas ainda assim descubro novos todos os dias. Você é a calma que preenche o meu coração, é a luz que ilumina os meus caminhos, é a razão dos meus sorrisos. Quando penso em tudo o que Deus criou de mais lindo, é impossível não lembrar que Ele colocou a essência disso no seu sorriso.</p>
+            <p>Eu sei que você às vezes diz que tudo ainda é recente, que somos jovens, mas a verdade é que o amor não se mede pelo tempo e sim pela intensidade. E o que eu sinto por você é tão verdadeiro que nada pode apagar. Quando eu digo que vamos ser “NÓS”, é porque tenho certeza de que seremos.</p>
+            <p>Eu passo boa parte do meu tempo agradecendo a Deus por me permitir estar ao lado de alguém tão especial. Não quero nunca te perder. Meu maior desejo é fazer de você a mulher mais feliz desse mundo, te dar tudo o que você sonhar e muito mais. Hoje, talvez eu ainda não tenha muito a oferecer, mas sei que com esforço, dedicação e fé, vou conquistar cada coisa e entregar em suas mãos, antes mesmo de você pedir.Eu não penso em futuro sem você. Penso em nós, em Deus abençoando nossos caminhos e nos guiando até o dia em que teremos nossa própria família, com nossos filhos correndo pela casa, e o nosso amor sendo o centro de tudo.</p>
+            <p>Esse texto pode parecer simples, mas cada palavra aqui carrega toda a intensidade do meu coração. Eu prometo nunca parar de lutar por você, nunca parar de crescer por você, nunca parar de te amar com toda a força que eu tenho. Você é minha menina, minha pequena, minha princesa. E nada no mundo é maior do que o amor que sinto por você.</p>
+        </div>
+    </section>
+    <section class="content-section" id="section-galeria" style="display:none;">
+        <h2 class="section-title">GALERIA DE FOTOS</h2>
+        <div class="galeria-scroll">
+            <img src="index/01.jpg" alt="Descrição da imagem 1" width="300" height="300">
+            <img src="index/02.jpg" alt="Descrição da imagem 2" width="300" height="300">
+            <img src="index/03.jpg" alt="Descrição da imagem 3" width="300" height="300">
+            <img src="index/04.jpeg" alt="Descrição da imagem 4" width="300" height="300">
+            <img src="index/06.jpeg" alt="Descrição da imagem 5" width="300" height="300">
+            <img src="index/05.jpeg" alt="Descrição da imagem 6" width="300" height="300">
+        </div>
+    </section>
+    <section class="content-section" id="section-metas" style="display:none;">
+        <h2 class="section-title">Minhas Metas com Você</h2>
+        <div class="text-area">
+            <ol style="font-size:1.1rem;line-height:1.7;">
+                <li>Te pedir em namoro</li>
+                <li>Dar o primeiro presente especial</li>
+                <li>Planejar o primeiro encontro inesquecível</li>
+                <li>Tirar a primeira foto de casal juntos</li>
+                <li>Assistir ao primeiro pôr do sol de mãos dadas</li>
+                <li>Fazer uma playlist só pra ela</li>
+                <li>Te surpreender com flores sem motivo</li>
+                <li>Escrever uma carta à mão falando o quanto te amo</li>
+                <li>Passar uma madrugada inteira conversando</li>
+                <li>Cozinhar algo pra você</li>
+                <li>Te fazer sorrir todos os dias</li>
+                <li>Ir em um show do Jorge e Mateus com você</li>
+                <li>Viajar juntos pela primeira vez</li>
+                <li>Acompanhar você em um sonho pessoal</li>
+                <li>Ter um chaveiro, pulseira ou algo que combina igual de casal</li>
+                <li>Apresentar você para minha família oficialmente</li>
+                <li>Conhecer a sua família toda</li>
+                <li>Passar um aniversário importante ao seu lado</li>
+                <li>Fazer um piquenique romântico</li>
+                <li>Escrever metas de casal juntos</li>
+                <li>Viajar para outro país juntos</li>
+                <li>Fazer um álbum de fotos e memórias</li>
+                <li>Ter um apelido carinhoso especial só nosso</li>
+                <li>Comprar algo simbólico juntos</li>
+                <li>Ter uma noite só de filmes e comida</li>
+                <li>Te ajudar em um dia difícil sem você pedir</li>
+                <li>Aprender algo novo juntos</li>
+                <li>Celebrar nossas pequenas vitórias</li>
+                <li>Fazer um café da manhã na cama pra você</li>
+                <li>Recriar nosso primeiro encontro depois de alguns anos</li>
+                <li>Fazer você sentir orgulho de mim</li>
+                <li>Me esforçar pra sempre te escutar e entender</li>
+                <li>Te surpreender em datas inesperadas</li>
+                <li>Dar suporte nos momentos mais difíceis</li>
+                <li>Fazer uma viagem dos sonhos juntos</li>
+                <li>Compartilhar um hobby com você</li>
+                <li>Te ajudar a realizar um grande sonho</li>
+                <li>Celebrar nosso primeiro ano de namoro de forma marcante</li>
+                <li>Criar um lugar especial só nosso</li>
+                <li>Conversar sobre o futuro com sinceridade</li>
+                <li>Planejar o nosso casamento</li>
+                <li>Te pedir em casamento</li>
+                <li>Ter uma lua de mel incrível</li>
+                <li>Fazer uma surpresa romântica no seu aniversário todo ano</li>
+                <li>Renovar nossos votos de amor de tempos em tempos</li>
+                <li>Construir ou comprar a nossa casa</li>
+                <li>Ter um golden muito lindo</li>
+                <li>Montar o quarto dos nossos filhos</li>
+                <li>Ter um menino mais velho</li>
+                <li>Ter uma menina mais nova</li>
+                <li>Ensinar nossos filhos a importância do amor</li>
+                <li>Fazer viagens em família</li>
+                <li>Tirar a primeira foto oficial da família</li>
+                <li>Ajudar nossos filhos nos estudos</li>
+                <li>Levar nossos filhos pra conhecer o mundo</li>
+                <li>Criar tradições de família</li>
+                <li>Ir à primeira apresentação escolar dos filhos</li>
+                <li>Dar exemplo de amor e respeito pros filhos</li>
+                <li>Ensinar nossos filhos a valorizar você</li>
+                <li>Ser o herói dos nossos filhos e você a rainha</li>
+                <li>Estudar e crescer profissionalmente ao seu lado</li>
+                <li>Realizar um grande sonho material juntos</li>
+                <li>Ter um fundo de viagens de casal</li>
+                <li>Ajudar na igreja juntos</li>
+                <li>Manter nossa noite de casal mesmo depois de anos</li>
+                <li>Ter uma aposentadoria tranquila ao seu lado</li>
+                <li>Fazer uma viagem só nós dois depois de sermos pais</li>
+                <li>Sempre te dizer “eu te amo”</li>
+                <li>Agradecer a Deus por ter você</li>
+                <li>Ser seu melhor amigo</li>
+                <li>Apoiar todos os seus sonhos</li>
+                <li>Nunca deixar o romance morrer</li>
+                <li>Ter um aniversário de casamento memorável</li>
+                <li>Relembrar nossas primeiras memórias depois de décadas</li>
+                <li>Cuidar de você quando estiver doente</li>
+                <li>Envelhecer ao seu lado</li>
+                <li>Fazer você feliz todos os dias da minha vida</li>
+            </ol>
+        </div>
+    </section>
+    <section class="content-section" id="section-surpresa" style="display:none;">
+        <h2 class="section-title">Surpresa!</h2>
+        <div class="text-area" style="font-size:1.2rem;">
+            <p>Eu quero contruir uma família com você! 💖<br>
+            <img src="index/07.png" alt="Descrição da imagem 7" width="300" height="300"><br>
+            <b>Te amo mais do que consigo escrever aqui!</b>
+            </p>
+        </div>
+    </section>
+    <footer id="footer-main" style="display:none;">
+        <p>© 2025 Propriedade Gustavo Ouverney. Todos os direitos reservados.</p>
+    </footer>
+</div>
+
+<script>
+const LOGIN_VALIDOS = ["Alice", "alice"];
+const QUASES = ["Vasco", "vasco", "Clash Royale", "clash royale", "Clash", "clash"];
+const loginScreen = document.getElementById('login-screen');
+const chooseScreen = document.getElementById('choose-screen');
+const loginForm = document.getElementById('login-form');
+const loginInput = document.getElementById('login-input');
+const loginError = document.getElementById('login-error');
+const music = document.getElementById('bg-music');
+const btn = document.getElementById('music-toggle');
+const musicToggleIcon = document.getElementById('music-toggle-icon');
+const musicArrow = document.getElementById('music-arrow');
+const musicSelectContainer = document.getElementById('music-select-container');
+const musicSelect = document.getElementById('music-select');
+const containerMain = document.getElementById('container-main');
+const footerMain = document.getElementById('footer-main');
+const btnVoltarSelecao = document.getElementById('btn-voltar-selecao');
+let playing = false;
+let quaseMsg = document.getElementById('login-quase');
+if (!quaseMsg) {
+    quaseMsg = document.createElement('div');
+    quaseMsg.id = 'login-quase';
+    quaseMsg.style.color = '#c97d00';
+    quaseMsg.style.fontSize = '1rem';
+    quaseMsg.style.display = 'none';
+    loginForm.appendChild(quaseMsg);
+}
+document.body.style.overflow = 'hidden';
+music.style.display = 'none';
+btn.style.display = 'none';
+
+loginForm.onsubmit = function(e) {
+    e.preventDefault();
+    const valor = loginInput.value.trim();
+    loginError.style.display = 'none';
+    quaseMsg.style.display = 'none';
+    if (LOGIN_VALIDOS.includes(valor)) {
+        loginScreen.style.display = 'none';
+        chooseScreen.style.display = 'flex';
+        chooseScreen.style.flexDirection = 'column';
+        document.body.style.overflow = '';
+        music.style.display = 'none';
+        btn.style.display = 'none';
+        musicToggleIcon.textContent = '🔊 Música';
+        playing = false;
+        // Toca a música assim que acertar a charada
+        music.style.display = '';
+        btn.style.display = '';
+        music.play().then(() => {
+            playing = true;
+            musicToggleIcon.textContent = '⏸️ Música';
+        }).catch(() => {
+            playing = false;
+            musicToggleIcon.textContent = '🔊 Música';
+        });
+    } else if (QUASES.includes(valor)) {
+        quaseMsg.textContent = 'Passou perto, mas não é esse!';
+        quaseMsg.style.display = 'block';
+        loginInput.value = '';
+        loginInput.focus();
+    } else {
+        loginError.style.display = 'block';
+        loginInput.value = '';
+        loginInput.focus();
+    }
+};
+
+btn.onclick = function(e) {
+    if (e.target === musicArrow) {
+        if (musicSelectContainer.style.display === 'none' || musicSelectContainer.style.display === '') {
+            musicSelectContainer.style.display = 'block';
+            musicArrow.style.transform = 'rotate(180deg)';
+        } else {
+            musicSelectContainer.style.display = 'none';
+            musicArrow.style.transform = '';
+        }
+        return;
+    }
+    if (playing) {
+        music.pause();
+        musicToggleIcon.textContent = '🔊 Música';
+        playing = false;
+    } else {
+        music.play();
+        musicToggleIcon.textContent = '⏸️ Música';
+        playing = true;
+    }
+    musicSelectContainer.style.display = 'none';
+    musicArrow.style.transform = '';
+};
+
+musicSelect.onchange = function() {
+    const wasPlaying = !music.paused;
+    music.pause();
+    music.currentTime = 0;
+    music.src = musicSelect.value;
+    music.load();
+    if (wasPlaying || playing) {
+        music.play().then(() => {
+            playing = true;
+            musicToggleIcon.textContent = '⏸️ Música';
+        }).catch(() => {
+            playing = false;
+            musicToggleIcon.textContent = '🔊 Música';
+        });
+    } else {
+        musicToggleIcon.textContent = '🔊 Música';
+    }
+    musicSelectContainer.style.display = 'none';
+    musicArrow.style.transform = '';
+};
+
+function mostrarSecao(secao) {
+    containerMain.style.display = '';
+    footerMain.style.display = '';
+    // Oculta todas as seções
+    document.getElementById('section-galeria').style.display = 'none';
+    document.getElementById('section-escritas').style.display = 'none';
+    document.getElementById('section-metas').style.display = 'none';
+    document.getElementById('section-surpresa').style.display = 'none';
+    // Mostra só a escolhida
+    if (secao === 'galeria') {
+        document.getElementById('section-galeria').style.display = '';
+    } else if (secao === 'escritas') {
+        document.getElementById('section-escritas').style.display = '';
+    } else if (secao === 'metas') {
+        document.getElementById('section-metas').style.display = '';
+    } else if (secao === 'surpresa') {
+        document.getElementById('section-surpresa').style.display = '';
+    }
+    chooseScreen.style.display = 'none';
+    // Botão e música já estão visíveis/tocando após login, não precisa repetir aqui
+    btnVoltarSelecao.style.display = 'block';
+}
+
+// Evento do botão de voltar para seleção
+btnVoltarSelecao.onclick = function() {
+    containerMain.style.display = 'none';
+    footerMain.style.display = 'none';
+    chooseScreen.style.display = 'flex';
+    btnVoltarSelecao.style.display = 'none';
+    // Não para a música e não esconde o botão!
+    // music.style.display = 'none';
+    // btn.style.display = 'none';
+    // music.pause();
+    // musicToggleIcon.textContent = '🔊 Música';
+    // playing = false;
+};
+
+document.querySelectorAll('.choose-btn').forEach(btn => {
+    btn.onclick = function() {
+        mostrarSecao(btn.getAttribute('data-section'));
+    };
+});
+</script>
+</body>
+</html>
